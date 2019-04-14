@@ -1,22 +1,22 @@
 'use strict';
 
-var utils = require('./utils');
-var Rule = require('./rule');
+import * as utils from './utils/utils';
+import Rule from './rule';
 
-var Validator = newValidator();
+let Validator = newValidator();
 
-Validator.create = function(options) {
+Validator.create = function (options) {
   return newValidator(options);
 };
 
 function newValidator(options) {
   options = options || {};
-  var validator = {};
+  let validator = {};
 
   // clone methods from Rule to validator
   Object.keys(Rule.prototype).forEach(function (methodName) {
     validator[methodName] = function () {
-      var rule = new Rule(options.templates);
+      let rule = new Rule(options.templates);
       return rule[methodName].apply(rule, arguments);
     };
   });
@@ -28,4 +28,4 @@ function newValidator(options) {
   return validator;
 }
 
-module.exports = Validator;
+export default Validator;

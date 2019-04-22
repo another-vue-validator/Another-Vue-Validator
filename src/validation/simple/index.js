@@ -44,6 +44,10 @@ let plugin = {
 
 let extendTemplates = plugin.extendTemplates;
 
+let setMode = function( mode ) {
+  avvConfig.setMode(mode);
+};
+
 export default plugin;
 
 export {
@@ -52,6 +56,7 @@ export {
   Rule,
   Validator,
   //mixin,
+  setMode,
   extendTemplates
 };
 

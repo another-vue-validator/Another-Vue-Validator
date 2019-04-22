@@ -1,5 +1,4 @@
 'use strict';
-
 import mixinUtils from './utils/mixin-utils';
 import * as utils from './utils/utils';
 import ValidationBag from './validation-bag';
@@ -46,7 +45,7 @@ let mixin = {
       // validate methods contains all application validate codes
       this.$options.validateMethods = {};
 
-      this.$options.validatorsUnwatchCallbacks = {};
+      this.$options.validatorsUnwatchCallbacks = [];
 
       // generate validate methods and watch properties change for validators
       if (avv && avv.validators) {

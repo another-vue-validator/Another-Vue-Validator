@@ -1,7 +1,7 @@
 'use strict';
 
 export default {
-  INTERACTIVE: 'INTERACTIVE',
-  MANUAL: 'MANUAL',
-  CONSERVATIVE: 'CONSERVATIVE'
+  INTERACTIVE: 'interactive',
+  MANUAL: 'manual',
+  CONSERVATIVE: 'conservative'
 };

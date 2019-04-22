@@ -10,9 +10,9 @@ export default {
   },
 
   setMode(val) {
-    if (modes[val] == null) {
+    if (modes[val.toUpperCase()] == null) {
       throw new Error('Invalid mode: ' + val);
     }
     this.mode = val;
   }
-}
+};

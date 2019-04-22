@@ -1,3 +1,5 @@
+'use strict';
+
 import utils from '../../utils/utils';
 
 export default class EventManager {
@@ -26,7 +28,7 @@ export default class EventManager {
   }
 
   removeEventListeners(el, events) {
-    console.log("before remove", this.eventData.size);
+    console.log('before remove', this.eventData.size);
 
     //let subList = this.eventData.filter(data => data.el === el);
     // Clone the array so we can remove items below without effecting the loop
@@ -38,31 +40,7 @@ export default class EventManager {
     });
   }
 
-  _removeEventListener(data, events) {
-    if (events) {
-      // Only remove listener if contained in given events args
-      if (events.includes(data.event)) {
-        this._removeListenerAndData(data);
-      }
-
-    } else {
-      // Always remove listener
-      this._removeListenerAndData(data);
-    }
-
-    console.log("after remove", this.eventData.size);
-  }
-
-  _removeListenerAndData(data) {
-    data.el.removeEventListener(data.event, data.listener);
-    let dataArray = this.eventData.get(data.el);
-    utils.remove(dataArray, data);
-    if (dataArray.length == 0) {
-      this.eventData.delete(data.el);
-    }
-  }
-
-  getTouchEventNames(el) {
+  static getTouchEventNames(el) {
 
     let name = el.nodeName.toLowerCase();
     if (name === 'input' ||
@@ -77,7 +55,7 @@ export default class EventManager {
     return [];
   }
 
-  findVModelExpr(vnode, binding) {
+  static findVModelExpr(vnode, binding) {
 
     if (vnode == null) {
       return null;
@@ -89,7 +67,9 @@ export default class EventManager {
       expr = binding.value ? binding.value.expr : binding.expression;
     }
 
-    if (expr) return expr;
+    if (expr) {
+      return expr;
+    }
 
     if (vnode.data.model) {
       return vnode.data.model.expression;
@@ -100,9 +80,35 @@ export default class EventManager {
         return directive.name === 'model';
       });
 
-      if (model) return model.expression;
+      if (model) {
+        return model.expression;
+      }
     }
 
     return null;
+  }
+
+  _removeEventListener(data, events) {
+    if (events) {
+      // Only remove listener if contained in given events args
+      if (events.includes(data.event)) {
+        this._removeListenerAndData(data);
+      }
+
+    } else {
+      // Always remove listener
+      this._removeListenerAndData(data);
+    }
+
+    console.log('after remove', this.eventData.size);
+  }
+
+  _removeListenerAndData(data) {
+    data.el.removeEventListener(data.event, data.listener);
+    let dataArray = this.eventData.get(data.el);
+    utils.remove(dataArray, data);
+    if (dataArray.length === 0) {
+      this.eventData.delete(data.el);
+    }
   }
 }

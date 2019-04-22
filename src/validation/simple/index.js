@@ -36,7 +36,7 @@ let plugin = {
       templates[key] = newTemplates[key];
     });
   }
-}
+};
 
 
 /* exports
@@ -47,12 +47,13 @@ let extendTemplates = plugin.extendTemplates;
 export default plugin;
 
 export {
+  plugin as avv,
   ValidationBag,
   Rule,
   Validator,
   //mixin,
   extendTemplates
-}
+};
 
 // module.exports.name = 'SimpleVueValidator';
 // module.exports.ValidationBag = ValidationBag;

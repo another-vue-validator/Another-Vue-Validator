@@ -10,7 +10,9 @@ export default [
         output: [
             {file: pkg.main, format: 'cjs'},
             {file: pkg.module, format: 'es'},
-            {name: 'avv', file: pkg.browser, format: 'iife'}
+            {name: 'avv', file: pkg.browser, moduleName: 'avv', format: 'iife'},
+            {name: 'avv', file: pkg.avvDocsEs, format: 'es'},
+            {name: 'avv', file: pkg.avvDocsIife, format: 'iife'}
         ]
     },
 

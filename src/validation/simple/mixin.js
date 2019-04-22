@@ -3,7 +3,7 @@
 import mixinUtils from './utils/mixin-utils';
 import * as utils from './utils/utils';
 import ValidationBag from './validation-bag';
-import ValidationContext from "../ValidationContext";
+import ValidationContext from '../ValidationContext';
 import avvConfig from '../config/avvConfig';
 import modes from '../config/modes';
 
@@ -44,11 +44,9 @@ let mixin = {
       unwatch(this.$options.validatorsUnwatchCallbacks);
 
       // validate methods contains all application validate codes
-      let validateMethods = {};
-      this.$options.validateMethods = validateMethods;
+      this.$options.validateMethods = {};
 
-      let unwatchCallbacks = [];
-      this.$options.validatorsUnwatchCallbacks = unwatchCallbacks;
+      this.$options.validatorsUnwatchCallbacks = {};
 
       // generate validate methods and watch properties change for validators
       if (avv && avv.validators) {
@@ -224,7 +222,7 @@ function createValidateMethod(validator, keypath, getter) {
 
     ctx.value = getter();
 
-      let rule = validator.apply(this, [ctx]);
+    let rule = validator.apply(this, [ctx]);
     if (rule) {
 
       if (!rule._field) {
@@ -240,7 +238,7 @@ function createValidateMethod(validator, keypath, getter) {
       this.validation.setError(keypath);
       return Promise.resolve(false);
     }
-  }
+  };
 }
 
 export default mixin;

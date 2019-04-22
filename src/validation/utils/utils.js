@@ -1,3 +1,5 @@
+'use strict';
+
 let utils = {
 
   remove(array, element) {
@@ -7,6 +9,6 @@ let utils = {
       array.splice(index, 1);
     }
   }
-}
+};
 
 export default utils;

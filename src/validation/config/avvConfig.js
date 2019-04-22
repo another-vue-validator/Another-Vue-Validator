@@ -1,3 +1,5 @@
+'use strict';
+
 import modes from './modes';
 
 export default {

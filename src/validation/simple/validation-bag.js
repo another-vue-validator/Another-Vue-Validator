@@ -25,11 +25,11 @@ ValidationBag.prototype._setVM = function (vm) {
 ValidationBag.prototype.addField = function (options) {
 
   // if (this.resetting) {
-  //   throw new Error("Cannot add field while resetting");
+  //   throw new Error('Cannot add field while resetting');
   // }
 
   let field = new Field(options);
-  this._vm.$set(this.fields, options.keypath, field)
+  this._vm.$set(this.fields, options.keypath, field);
   //this.fields[options.keypath] = field;
   return field;
 };
@@ -47,15 +47,15 @@ ValidationBag.prototype.addError = function (keypath, message) {
 
 ValidationBag.prototype.getField = function (keypath) {
   if (keypath == null) {
-    throw new Error("keypath cannot be null");
+    throw new Error('keypath cannot be null');
   }
 
   let field = this.fields[keypath];
   // if (field == null) {
-  //   throw new Error("no validator defined for keypath " + keypath);
+  //   throw new Error('no validator defined for keypath ' + keypath);
   // }
   return field;
-}
+};
 
 ValidationBag.prototype.removeErrors = function (keypath) {
 
@@ -74,7 +74,7 @@ ValidationBag.prototype.hasError = function (keypath) {
 
   if (keypath == null) {
     let fields = Object.values(this.fields);
-    let result = fields.some(field => field.hasError())
+    let result = fields.some(field => field.hasError());
     return result;
   }
 
@@ -83,7 +83,7 @@ ValidationBag.prototype.hasError = function (keypath) {
     return field.hasError();
   }
   return false;
-}
+};
 
 ValidationBag.prototype.firstError = function (keypath) {
 
@@ -91,7 +91,9 @@ ValidationBag.prototype.firstError = function (keypath) {
     for (let key in this.fields) {
       let field = this.fields[key];
       let error = field.firstError();
-      if (error) return error;
+      if (error) {
+        return error;
+      }
     }
   }
 
@@ -108,22 +110,23 @@ ValidationBag.prototype.allErrors = function (keypath) {
     return this.fields[keypath].errors();
   } else {
     Object.values().map(field => {
-      return field.errors()
-    })
+      return field.errors();
+    });
   }
-
-}
+};
 
 ValidationBag.prototype.countErrors = function (keypath) {
 
   if (keypath == null) {
     this.fields.reduce((total, field) => {
-      total + field.errors().length;
+      return total + field.errors().length;
     });
 
   } else {
     let field = this.fields[keypath];
-    if (field) return field.errors().length;
+    if (field) {
+      return field.errors().length;
+    }
   }
 };
 
@@ -163,7 +166,9 @@ ValidationBag.prototype.resetValidating = function (keypath) {
 
 ValidationBag.prototype.isValidating = function (keypath, id) {
   let field = this.getField(keypath);
-  if (!field) return false;
+  if (!field) {
+    return false;
+  }
 
   if (id == null) {
     return field.isValidating();
@@ -186,12 +191,14 @@ ValidationBag.prototype._isFlag = function (keypath, flag) {
     for (let key in this.fields) {
       let field = this.fields[key];
       let flags = field.getFlags();
-      console.log(key, flag, flags[flag])
-      if (flags[flag]) return true;
+
+      if (flags[flag]) {
+        return true;
+      }
     }
     return false;
   }
-}
+};
 
 
 ValidationBag.prototype.show = function (keypath, flags) {
@@ -210,7 +217,10 @@ ValidationBag.prototype.show = function (keypath, flags) {
     return err && passed.length > 0;
   }
 
-  if (err && this.activated) return true; // First criteria to show error
+  // First criteria to show error
+  if (err && this.activated) {
+    return true;
+  }
 
   let touched = this.isTouched(keypath);
   let dirty = this.isDirty(keypath);
@@ -218,54 +228,58 @@ ValidationBag.prototype.show = function (keypath, flags) {
 
   //let validated = this.isValidated(keypath);
   //if (err && validated) return true;
-  if (err && touched && dirty) return true; // Second criteria to show error
+
+  // Second criteria to show error
+  if (err && touched && dirty) {
+    return true;
+  }
   return false;
-}
+};
 
 ValidationBag.prototype.forceShow = function (keypath) {
   this.setTouched(keypath, true);
   this.setDirty(keypath, true);
-}
+};
 
 ValidationBag.prototype.isValid = function (keypath) {
   return !this._isFlag(keypath, 'invalid');
-}
+};
 
 ValidationBag.prototype.isInvalid = function (keypath) {
   return this._isFlag(keypath, 'invalid');
-}
+};
 
 ValidationBag.prototype.isPristine = function (keypath) {
   return !this._isFlag(keypath, 'dirty');
-}
+};
 
 ValidationBag.prototype.isDirty = function (keypath) {
   return this._isFlag(keypath, 'dirty');
-}
+};
 
 ValidationBag.prototype.isTouched = function (keypath) {
   return this._isFlag(keypath, 'touched');
-}
+};
 
 ValidationBag.prototype.isUntouched = function (keypath) {
   return !this._isFlag(keypath, 'touched');
-}
+};
 
 ValidationBag.prototype.isValidated = function (keypath) {
   return this._isFlag(keypath, 'validated');
-}
+};
 
 ValidationBag.prototype.isChanged = function (keypath) {
   return this._isFlag(keypath, 'changed');
-}
+};
 
 ValidationBag.prototype.isPending = function (keypath) {
   return this._isFlag(keypath, 'pending');
-}
+};
 
 ValidationBag.prototype.setFlag = function (keypath, flag, val) {
   if (val == null) {
-    throw new Error(flag + " accepts true/false as argument");
+    throw new Error(flag + ' accepts true/false as argument');
   }
   if (this.resetting) {
     return;
@@ -275,43 +289,43 @@ ValidationBag.prototype.setFlag = function (keypath, flag, val) {
   if (field) {
     field.getFlags()[flag](val);
   }
-}
+};
 
 // ValidationBag.prototype.setInvalid = function (keypath) {
-//   this.setFlag(keypath, "setValid", false)
+//   this.setFlag(keypath, 'setValid', false)
 // }
 
 ValidationBag.prototype.setValid = function (keypath, val) {
-  this.setFlag(keypath, "setValid", val)
-}
+  this.setFlag(keypath, 'setValid', val);
+};
 
 // ValidationBag.prototype.setPristine = function (keypath, val) {
-//   this.setFlag(keypath, "setDirty", val)
+//   this.setFlag(keypath, 'setDirty', val)
 // }
 
 ValidationBag.prototype.setDirty = function (keypath, val) {
-  this.setFlag(keypath, "setDirty", val)
-}
+  this.setFlag(keypath, 'setDirty', val);
+};
 
 ValidationBag.prototype.setTouched = function (keypath, val) {
-  this.setFlag(keypath, "setTouched", val)
-}
+  this.setFlag(keypath, 'setTouched', val);
+};
 
 // ValidationBag.prototype.setUntouched = function (keypath) {
-//   this.setFlag(keypath, "setTouched", false)
+//   this.setFlag(keypath, 'setTouched', false)
 // }
 
 ValidationBag.prototype.setPending = function (keypath, val) {
-  this.setFlag(keypath, "setPending", val)
-}
+  this.setFlag(keypath, 'setPending', val);
+};
 
 ValidationBag.prototype.setValidated = function (keypath, val) {
-  this.setFlag(keypath, "setValidated", val)
-}
+  this.setFlag(keypath, 'setValidated', val);
+};
 
 ValidationBag.prototype.setChanged = function (keypath, val) {
-  this.setFlag(keypath, "setChanged", val)
-}
+  this.setFlag(keypath, 'setChanged', val);
+};
 
 // ValidationBag.prototype.setPassed = function (field) {
 //   if (this.resetting) {
@@ -413,7 +427,7 @@ ValidationBag.prototype.setError = function (keypath, message) {
   let _addMessages = addMessages.bind(this);
   let _setAsyncMessages = setAsyncMessages.bind(this);
 
-  var messages = utils.isArray(message) ? message : [message];
+  let messages = utils.isArray(message) ? message : [message];
 
   var hasPromise = messages.filter(function (message) {
     return message && message.then;
@@ -438,6 +452,7 @@ ValidationBag.prototype.checkRule = function (rule) {
 };
 
 function setAsyncMessages(keypath, messages) {
+  /* jshint validthis:true */
 
   // if message is promise, we are encountering async validation, set validating flag and wait for message to resolve
   // reset previous validating status for this keypath
@@ -455,6 +470,8 @@ function setAsyncMessages(keypath, messages) {
       // check if the validating id is is still valid
       if (this.isValidating(keypath, validatingId)) {
         //console.log(validatingId + ' | ' + 'processed');
+
+        let _addMessages = addMessages.bind(this);
         return _addMessages(keypath, messages);
       }
       return false;
@@ -471,6 +488,7 @@ function setAsyncMessages(keypath, messages) {
 }
 
 function addMessages(keypath, messages) {
+  /*jshint validthis:true */
   let hasError = false;
   messages.forEach(function (message) {
 
@@ -484,7 +502,7 @@ function addMessages(keypath, messages) {
   //   this.setPassed(keypath);
   // }
   return hasError;
-};
+}
 
 var validatingId = 0;
 

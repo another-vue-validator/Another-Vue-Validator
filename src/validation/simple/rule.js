@@ -12,8 +12,8 @@ import {
   isFunction,
   optionCombiner
 }
-  from './utils/utils'
-import ValidationContext from "../ValidationContext";
+  from './utils/utils';
+import ValidationContext from '../ValidationContext';
 
 function Rule(templates) {
   this._field = '';
@@ -64,7 +64,7 @@ Rule.prototype.custom = function (callback, context) {
         .then(function (result) {
           return result;
         })
-        .catch(function (e) {
+        .catch(function (err) {
           //console.error(e.toString());
           return that.templates.error;
         });
@@ -127,35 +127,35 @@ Rule.prototype.rangeCheck = function (message, template, origArgs, check) {
     }
   }
   return this;
-}
+};
 
 Rule.prototype.lessThan = function (bound, message) {
 
   return this.rangeCheck(message, this.templates.lessThan, arguments, (number) => {
     return (number >= bound);
   });
-}
+};
 
 Rule.prototype.lessThanOrEqualTo = function (bound, message) {
 
   return this.rangeCheck(message, this.templates.lessThanOrEqualTo, arguments, (number) => {
     return (number > bound);
   });
-}
+};
 
 Rule.prototype.greaterThan = function (bound, message) {
 
   return this.rangeCheck(message, this.templates.greaterThan, arguments, (number) => {
     return (number <= bound);
   });
-}
+};
 
 Rule.prototype.greaterThanOrEqualTo = function (bound, message) {
 
   return this.rangeCheck(message, this.templates.greaterThanOrEqualTo, arguments, (number) => {
     return (number < bound);
   });
-}
+};
 
 Rule.prototype.between = function (lowBound, highBound, message) {
 
@@ -222,7 +222,7 @@ Rule.prototype.inCheck = function (options, message, name, template, origArgs, c
   let value = this._checkValue();
 
   if (!Array.isArray(options)) {
-    throw new Error("validator." + name + "() requires an array of options");
+    throw new Error('validator.' + name + '() requires an array of options');
   }
 
   let chk = check(value);
@@ -233,18 +233,18 @@ Rule.prototype.inCheck = function (options, message, name, template, origArgs, c
     this.addMessage.apply(this, result);
   }
   return this;
-}
+};
 
 Rule.prototype.in = function (options, message) {
-  return this.inCheck(options, message, "in", this.templates.in, arguments, (value) => {
+  return this.inCheck(options, message, 'in', this.templates.in, arguments, (value) => {
     return (!isEmpty(value) && options.indexOf(value) < 0);
   });
 };
 Rule.prototype.notIn = function (options, message) {
-  return this.inCheck(options, message, "in", this.templates.notIn, arguments, (value) => {
+  return this.inCheck(options, message, 'in', this.templates.notIn, arguments, (value) => {
     return (!isEmpty(value) && options.indexOf(value) >= 0);
   });
-}
+};
 
 Rule.prototype.match = function (valueToCompare, label, message) {
   let value = this._checkValue();

@@ -1,6 +1,6 @@
 'use strict';
 
-import * as utils from "../utils/utils";
+import * as utils from '../utils/utils';
 
 let depsByKeypath;
 
@@ -69,5 +69,5 @@ export default {
       // We end up with this structure
       // depsByKeypath -> { 'person.foo': { 'person.bar': null, 'person.moo': null }}
     });
-  },
-}
+  }
+};

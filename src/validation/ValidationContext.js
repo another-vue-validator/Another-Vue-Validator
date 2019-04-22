@@ -1,3 +1,5 @@
+'use strict';
+
 export default class ValidationContext {
 
   constructor(options) {
@@ -12,6 +14,6 @@ export default class ValidationContext {
 
 function getPathToParent(parts) {
   let clonedArrayWithoutProp = parts.slice(0, parts.length - 1);
-  let path = clonedArrayWithoutProp.join(".");
+  let path = clonedArrayWithoutProp.join('.');
   return path;
 }

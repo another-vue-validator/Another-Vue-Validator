@@ -104,7 +104,7 @@ export default {
       }
 
       let args = Array.prototype.slice.call(arguments);
-      let cachedResult = findInCache(cache, args);
+      let cachedResult = this.findInCache(cache, args);
 
       if (!utils.isUndefined(cachedResult)) {
         return cachedResult;
@@ -134,7 +134,7 @@ export default {
           return result;
         }
       }
-    }
+    };
   },
 
   findInCache(cache, args) {
@@ -146,4 +146,4 @@ export default {
       return items[0].result;
     }
   }
-}
+};

@@ -5,6 +5,8 @@
   "main": "dist/avv.cjs.js",
   "module": "dist/avv.esm.js",
   "browser": "dist/avv.js",
+  "avvDocsIife": "../another-vue-validator-docs/public/js/avv.js",
+  "avvDocsEs": "../another-vue-validator-docs/public/js/avv.esm.js",
   "devDependencies": {
     "@babel/core": "^7.4.3",
     "@babel/preset-env": "^7.4.3",

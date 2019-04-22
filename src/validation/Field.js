@@ -1,11 +1,13 @@
-import Flags from "./Flags";
+'use strict';
+
+import Flags from './Flags';
 
 export default class Field {
 
-  constructor(options = {initialValue: null, flags, errors: [], keypath: null}) {
+  constructor(options = {initialValue: null, flags: undefined, errors: [], keypath: null}) {
 
     if (options.keypath == null) {
-      throw new Error("keypath must be provided");
+      throw new Error('keypath must be provided');
     }
 
     this.errorList = options.errors || [];
@@ -52,8 +54,8 @@ export default class Field {
   }
 
   setInitialValue(val) {
-    this.initialValue = val
-    this.setValue( this.value );
+    this.initialValue = val;
+    this.setValue(this.value);
   }
 
   setValue(val) {
@@ -75,21 +77,21 @@ export default class Field {
 
   hasError() {
     return this.errorList.length > 0;
-  };
+  }
 
   addError(msg) {
     this.flags.setValid(false);
     this.errorList.push(msg);
-  };
+  }
 
 
   firstError() {
     return this.errorList[0];
-  };
+  }
 
   errors() {
     return this.errorList;
-  };
+  }
 
   setValidating(val) {
     this.validating = val;
@@ -117,14 +119,14 @@ export default class Field {
 
   resetValidating() {
     this.setValidatingId(null);
-    field.setValidating(false);
+    this.setValidating(false);
   }
 
   getDependencies() {
     return this.dependencies;
   }
 
-  setDependencies( deps = [] ) {
+  setDependencies(deps = []) {
     this.dependencies = deps;
   }
 }

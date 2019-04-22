@@ -18,7 +18,7 @@ export default {
     el = resolveEl(el, binding);
 
 
-    let eventNames = eventManager.getTouchEventNames(el);
+    let eventNames = EventManager.getTouchEventNames(el);
 
     // setTimeout(function() {
     //   console.log('BEFORE', eventManager.eventData.size)
@@ -26,7 +26,7 @@ export default {
     //   console.log('AFTER', eventManager.eventData.size)
     // }, 5000)
 
-    let expr = eventManager.findVModelExpr(vnode, binding);
+    let expr = EventManager.findVModelExpr(vnode, binding);
 
     //console.log('v-model expression', expr ? expr : 'could not find v-model expression on element ' + el.tagName);
     if (expr == null) {
@@ -48,7 +48,7 @@ export default {
 
     el = resolveEl(el, binding);
 
-    let eventNames = eventManager.getTouchEventNames(el);
+    let eventNames = EventManager.getTouchEventNames(el);
     eventManager.removeEventListeners(el, eventNames);
   }
 };
@@ -85,7 +85,7 @@ function getTouchListener(el, vm, keypath) {
 
   let touchListener = function (evt) {
 
-    let eventNames = eventManager.getTouchEventNames(el);
+    let eventNames = EventManager.getTouchEventNames(el);
     if (eventNames.includes(evt.type.toLowerCase())) {
 
       vm.validation.setTouched(keypath, true);

@@ -2,7 +2,9 @@ import Field from './Field';
 
 export default class FieldBag {
 
-  fields = {};
+  constructor() {
+    this.fields = {};
+  }
 
   setFieldFlags(flags) {
     for (let name in this.fields) {

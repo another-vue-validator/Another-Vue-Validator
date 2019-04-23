@@ -3,7 +3,7 @@
 import * as utils from './utils/utils';
 import Field from '../Field';
 
-function ValidationBag() {
+function ValidationBag(options = {}) {
   this.sessionId = 0; // async validator will check this before adding error
   this.resetting = 0; // do not allow to add error while reset is in progress
 
@@ -16,11 +16,8 @@ function ValidationBag() {
   // this.passedRecords = [];
   // this.touchedRecords = [];
   this.activated = false; // set when $validate() is call, this flag works with the conservative mode
+  this._vm = options.vm;
 }
-
-ValidationBag.prototype._setVM = function (vm) {
-  this._vm = vm;
-};
 
 ValidationBag.prototype.addField = function (options) {
 
@@ -29,8 +26,16 @@ ValidationBag.prototype.addField = function (options) {
   // }
 
   let field = new Field(options);
-  this._vm.$set(this.fields, options.keypath, field);
-  //this.fields[options.keypath] = field;
+
+  if (this._vm) {
+    // Add reactive field using Vue.set
+    this._vm.$set(this.fields, options.keypath, field);
+
+  } else {
+    // We still set the field but it won't be reactive
+    this.fields[options.keypath] = field;
+  }
+
   return field;
 };
 
@@ -51,16 +56,13 @@ ValidationBag.prototype.getField = function (keypath) {
   }
 
   let field = this.fields[keypath];
-  // if (field == null) {
-  //   throw new Error('no validator defined for keypath ' + keypath);
-  // }
   return field;
 };
 
 ValidationBag.prototype.removeErrors = function (keypath) {
 
   if (keypath == null) {
-    this.fields.forEach(field => field.removeErrors());
+    Object.values(this.fields).forEach(field => field.removeErrors());
 
   } else {
     let field = this.getField(keypath);
@@ -105,11 +107,10 @@ ValidationBag.prototype.firstError = function (keypath) {
 };
 
 ValidationBag.prototype.allErrors = function (keypath) {
-
   if (keypath) {
     return this.fields[keypath].errors();
   } else {
-    Object.values().map(field => {
+    return Object.values(this.fields).map(field => {
       return field.errors();
     });
   }
@@ -117,16 +118,20 @@ ValidationBag.prototype.allErrors = function (keypath) {
 
 ValidationBag.prototype.countErrors = function (keypath) {
 
-  if (keypath == null) {
-    this.fields.reduce((total, field) => {
-      return total + field.errors().length;
-    });
-
-  } else {
+  if (keypath) {
     let field = this.fields[keypath];
     if (field) {
       return field.errors().length;
     }
+
+  } else {
+
+    let sum = 0;
+    Object.values(this.fields).forEach(field => {
+      sum += field.errors().length;
+    });
+
+    return sum;
   }
 };
 
@@ -157,10 +162,9 @@ ValidationBag.prototype.resetValidating = function (keypath) {
       field.resetValidating();
     }
 
-
   } else {
     // TODO will this ever execute since keypath always exist?
-    this.fields.forEach(field => field.resetValidating());
+    Object.values(this.fields).forEach(field => field.resetValidating());
   }
 };
 
@@ -399,9 +403,7 @@ ValidationBag.prototype.reset = function (keypath) {
   }
 
   this.sessionId++;
-  Object.values(this.fields).forEach(field => {
-    field.reset();
-  });
+  Object.values(this.fields).forEach(field => field.reset());
 
   // this.validatingRecords = [];
   // this.passedRecords = [];

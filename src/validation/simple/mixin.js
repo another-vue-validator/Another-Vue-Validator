@@ -12,11 +12,7 @@ let mixin = {
 
   beforeMount: function () {
 
-    this.$validation = this.validation;
-
     if (this.validation) {
-      // set vm to validation
-      this.validation._setVM(this);
     }
 
     this.$setValidators(this.$options.avv);
@@ -31,7 +27,7 @@ let mixin = {
     let avv = this.$options.avv;
     if (avv && avv.validators) {
       return {
-        validation: new ValidationBag()
+        validation: new ValidationBag( { vm: this } )
       };
     }
     return {};

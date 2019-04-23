@@ -1,6 +1,6 @@
 'use strict';
 
-import utils from '../../utils/utils';
+import {remove} from '../utils/utils';
 
 export default class EventManager {
 

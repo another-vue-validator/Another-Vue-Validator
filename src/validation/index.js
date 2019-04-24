@@ -1,11 +1,11 @@
 'use strict';
 
-import ValidationBag from './validation-bag';
-import Rule from './rule';
-import Validator from './validator';
-import mixin from './mixin';
-import templates from './templates';
-import avvConfig from '../config/avvConfig';
+import ValidationBag from './core/validation-bag';
+import Rule from './core/rule';
+import Validator from './core/validator';
+import mixin from './core/mixin';
+import templates from './core/templates';
+import avvConfig from './core/config/avvConfig';
 import ValidateDirective from './directive/validateDirective';
 
 let plugin = {

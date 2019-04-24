@@ -1,10 +1,10 @@
 'use strict';
-import mixinUtils from './utils/mixin-utils';
-import * as utils from './utils/utils';
+import mixinUtils from '../utils/mixin-utils';
+import * as utils from '../utils/utils';
 import ValidationBag from './validation-bag';
-import ValidationContext from '../ValidationContext';
-import avvConfig from '../config/avvConfig';
-import modes from '../config/modes';
+import ValidationContext from './ValidationContext';
+import avvConfig from './config/avvConfig';
+import modes from './config/modes';
 
 let mixin = {
 

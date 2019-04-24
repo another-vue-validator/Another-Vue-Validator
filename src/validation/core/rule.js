@@ -12,8 +12,8 @@ import {
   isFunction,
   optionCombiner
 }
-  from './utils/utils';
-import ValidationContext from '../ValidationContext';
+  from '../utils/utils';
+import ValidationContext from './ValidationContext';
 
 function Rule(templates) {
   this._field = '';

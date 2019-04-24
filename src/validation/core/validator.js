@@ -1,6 +1,6 @@
 'use strict';
 
-import * as utils from './utils/utils';
+import * as utils from '../utils/utils';
 import Rule from './rule';
 
 let Validator = newValidator();

@@ -1,7 +1,7 @@
 'use strict';
 
-import * as utils from './utils/utils';
-import Field from '../Field';
+import * as utils from '../utils/utils';
+import Field from './Field';
 
 function ValidationBag(options = {}) {
   this.sessionId = 0; // async validator will check this before adding error

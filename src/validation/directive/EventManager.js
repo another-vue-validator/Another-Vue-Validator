@@ -106,7 +106,7 @@ export default class EventManager {
   _removeListenerAndData(data) {
     data.el.removeEventListener(data.event, data.listener);
     let dataArray = this.eventData.get(data.el);
-    utils.remove(dataArray, data);
+    remove(dataArray, data);
     if (dataArray.length === 0) {
       this.eventData.delete(data.el);
     }

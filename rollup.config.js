@@ -6,7 +6,7 @@ import buble from 'rollup-plugin-buble';
 
 export default [
     {
-        input: 'src/validation/simple/index.js',
+        input: 'src/avv/index.js',
         output: [
             {file: pkg.main, format: 'cjs'},
             {file: pkg.module, format: 'es'},
@@ -17,7 +17,7 @@ export default [
     },
 
     {
-        input: 'src/validation/simple/index.js',
+        input: 'src/avv/index.js',
         output: [
             {name: 'avv', file: pkg.main.replace(/\.js$/, '.min.js'), format: 'cjs'},
             {name: 'avv', file: pkg.module.replace(/\.js$/, '.min.js'), format: 'es'},

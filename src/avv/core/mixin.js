@@ -27,7 +27,7 @@ let mixin = {
     let avv = this.$options.avv;
     if (avv && avv.validators) {
       return {
-        validation: new ValidationBag( { vm: this } )
+        validation: new ValidationBag({vm: this})
       };
     }
     return {};
@@ -57,8 +57,11 @@ let mixin = {
     $addValidator(keypath, validator) {
       let getter = generateGetter(this, keypath);
 
+      let contextOptions = utils.splitKeypath(keypath);
+      let ctx = new ValidationContext(contextOptions);
+
       this.validation.addField({
-        keypath,
+        validationContext: ctx,
         initialValue: getter(),
       });
 
@@ -75,7 +78,7 @@ let mixin = {
         validator = mixinUtils.cache(validator, option);
       }
 
-      let validateMethod = createValidateMethod(validator, keypath, getter).bind(this);
+      let validateMethod = createValidateMethod(validator, keypath, ctx, getter).bind(this);
 
       // add to validate method list
       this.$options.validateMethods[keypath] = validateMethod;
@@ -201,10 +204,7 @@ function watchProperty(vm, keypath, callback) {
   //});
 }
 
-function createValidateMethod(validator, keypath, getter) {
-
-  let contextOptions = utils.splitKeypath(keypath);
-  let ctx = new ValidationContext(contextOptions);
+function createValidateMethod(validator, keypath, ctx, getter) {
 
   return function () {
     if (avvConfig.getMode() === modes.CONSERVATIVE && !this.validation.activated) { // do nothing if in conservative mode and $validate() method is not called before
@@ -230,6 +230,7 @@ function createValidateMethod(validator, keypath, getter) {
       return promise;
 
     } else {
+      // Clear errors by setting error without a message
       this.validation.setError(keypath);
       return Promise.resolve(false);
     }

@@ -1,17 +1,25 @@
 'use strict';
 
 import Flags from './Flags';
+import * as utils from '../utils/utils';
+import ValidationContext from './ValidationContext';
 
 export default class Field {
 
-  constructor(options = {initialValue: null, flags: undefined, errors: [], keypath: null}) {
+  constructor(options = {initialValue: null, flags: undefined, errors: [], validationContext: null, keypath: null}) {
 
-    if (options.keypath == null) {
+    if (options.keypath == null && options.validationContext == null) {
       throw new Error('keypath must be provided');
     }
 
+    if (options.validationContext == null) {
+      let contextOptions = utils.splitKeypath(options.keypath);
+      options.validationContext = new ValidationContext( contextOptions );
+    }
+
     this.errorList = options.errors || [];
-    this.keypath = options.keypath;
+    this.keypath = options.validationContext.path;
+    this.name = options.validationContext.prop;
     this.initialValue = this.value = options.initialValue;
     this.flags = options.flags || new Flags();
     this.validating = false;

@@ -7,6 +7,7 @@ import mixin from './core/mixin';
 import templates from './core/templates';
 import avvConfig from './core/config/avvConfig';
 import ValidateDirective from './directive/validateDirective';
+import * as utils from './utils/utils';
 
 let plugin = {
 
@@ -57,7 +58,8 @@ export {
   Validator,
   //mixin,
   setMode,
-  extendTemplates
+  extendTemplates,
+  utils
 };
 
 // module.exports.name = 'SimpleVueValidator';

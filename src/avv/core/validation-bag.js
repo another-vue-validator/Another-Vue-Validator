@@ -4,6 +4,11 @@ import * as utils from '../utils/utils';
 import Field from './Field';
 
 function ValidationBag(options = {}) {
+
+  if (options.vm == null) {
+    throw new Error('');
+  }
+
   this.sessionId = 0; // async validator will check this before adding error
   this.resetting = 0; // do not allow to add error while reset is in progress
 
@@ -27,14 +32,8 @@ ValidationBag.prototype.addField = function (options) {
 
   let field = new Field(options);
 
-  if (this._vm) {
-    // Add reactive field using Vue.set
-    this._vm.$set(this.fields, options.keypath, field);
-
-  } else {
-    // We still set the field but it won't be reactive
-    this.fields[options.keypath] = field;
-  }
+  // Add reactive field using Vue.set
+  this._vm.$set(this.fields, options.validationContext.path, field);
 
   return field;
 };
@@ -105,6 +104,16 @@ ValidationBag.prototype.firstError = function (keypath) {
   }
   return null;
 };
+
+ValidationBag.prototype.allErrorFields = function (keypath) {
+  if (keypath) {
+    return this.fields[keypath];
+  } else {
+    return Object.values(this.fields).map(field => {
+      return field;
+    });
+  }
+}
 
 ValidationBag.prototype.allErrors = function (keypath) {
   if (keypath) {
@@ -408,13 +417,13 @@ ValidationBag.prototype.reset = function (keypath) {
   // this.validatingRecords = [];
   // this.passedRecords = [];
   // this.touchedRecords = [];
-  if (this._vm) {
-    // prevent field updates at the same tick to change validation status
-    this.resetting++;
-    this._vm.$nextTick(function () {
-      this.resetting--;
-    }.bind(this));
-  }
+
+  // prevent field updates at the same tick to change validation status
+  this.resetting++;
+  this._vm.$nextTick(function () {
+    this.resetting--;
+  }.bind(this));
+
   this.activated = false;
 };
 

@@ -41,7 +41,7 @@ export default {
       return;
     }
 
-    eventManager.addEventListeners(el, eventNames, getTouchListener(el, vm, expr), {once: true});
+    eventManager.addEventListeners(el, eventNames, getTouchListener(el, vm, expr));
   },
 
   unbind(el, binding, vnode) {
@@ -84,14 +84,18 @@ function showOnError(binding) {
 function getTouchListener(el, vm, keypath) {
 
   let touchListener = function (evt) {
-
     let eventNames = EventManager.getTouchEventNames(el);
     if (eventNames.includes(evt.type.toLowerCase())) {
 
-      vm.validation.setTouched(keypath, true);
-
       let field = vm.validation.getField(keypath);
+
       if (field) {
+        if (field.getFlags().pristine) {
+          return;
+        }
+
+        vm.validation.setTouched(keypath, true);
+
         let deps = field.getDependencies();
         Object.keys(deps).forEach(dep => {
           vm.validation.forceShow(dep);

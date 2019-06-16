@@ -110,6 +110,14 @@ export function splitKeypath(keypath) {
 }
 
 export function prettyLabel(str) {
+
+  // Ignore str that starts with capital letter
+  if (startsWithCapital(str)) {
+    return str;
+  }
+
+  // Convert camel case to pretty form
+
   // insert a space before all caps
   str = str.replace(/([A-Z])/g, ' $1');
   str = str.toLowerCase();
@@ -138,4 +146,12 @@ export function remove(array, element) {
   if (index !== -1) {
     array.splice(index, 1);
   }
+}
+
+function startsWithCapital(str) {
+  if (typeof str !== 'string') {
+    return false;
+  }
+  let first = str.charAt(0);
+  return first === first.toUpperCase();
 }

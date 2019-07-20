@@ -5,9 +5,9 @@ import Field from './Field';
 
 function ValidationBag(options = {}) {
 
-  if (options.vm == null) {
-    throw new Error('');
-  }
+  // if (options.vm == null) {
+  //   throw new Error('');
+  // }
 
   this.sessionId = 0; // async validator will check this before adding error
   this.resetting = 0; // do not allow to add error while reset is in progress
@@ -23,6 +23,10 @@ function ValidationBag(options = {}) {
   this.activated = false; // set when $validate() is call, this flag works with the conservative mode
   this._vm = options.vm;
 }
+
+ValidationBag.prototype._setVM = function(vm) {
+  this._vm = vm;
+};
 
 ValidationBag.prototype.addField = function (options) {
 

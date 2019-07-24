@@ -12,11 +12,23 @@ let mixin = {
 
   beforeMount: function () {
 
+    this.$init();
+
     if (this.validation) {
+    // TODO we set VM here instead of in data(){} because Vue does sync' with component data and it causes infinite loops?
+      this.validation._setVM(this);
     }
+    //this.$addValidators(this.$options.avv);
+  },
 
-    this.$setValidators(this.$options.avv);
-
+  mounted: function () {
+    this.$addValidators(this.$options.avv);
+    // TODO add validators here or beforeMount? If added in beforeMount, data set component inside beforeMount will be
+    // validated when set, and thus in an invalid state immediately. Setting validators in mounted, means data set
+    // during beforeMount won't be validated since the validators haven't been set yet. However data in components
+    // should be set in the data(){} function anyway. However adding validators in mounted, means no validators
+    // are available once the view renders AND what if you *WANT* the validators to fire on the data.... in the case
+    // probably better to call $validate manually
   },
 
   beforeDestroy: function () {
@@ -25,24 +37,37 @@ let mixin = {
 
   data: function () {
     let avv = this.$options.avv;
-    if (avv && avv.validators) {
-      return {
-        validation: new ValidationBag({vm: this})
-      };
+    if (avv == null) {
+      avv = this.$options.avv = {};
     }
-    return {};
+
+    avv.validators = avv.validators || {};
+
+
+    let validation = new ValidationBag();
+    //validation._setVM(this);
+
+    return {
+      validation
+    };
   },
 
   methods: {
-    $setValidators: function (avv) {
-
+    $init: function () {
       unwatch(this.$options.validatorsUnwatchCallbacks);
 
       // validate methods contains all application validate codes
       this.$options.validateMethods = {};
 
       this.$options.validatorsUnwatchCallbacks = [];
+    },
 
+    $setValidators: function (avv) {
+      this.$init();
+      this.$addValidators(avv);
+    },
+
+    $addValidators: function (avv) {
       // generate validate methods and watch properties change for validators
       if (avv && avv.validators) {
         Object.keys(avv.validators).forEach(function (key) {
@@ -54,16 +79,22 @@ let mixin = {
       }
     },
 
+    $getValidatorMethod(keypath) {
+      return this.$options.validateMethods[keypath];
+    },
+
     $addValidator(keypath, validator) {
       let getter = generateGetter(this, keypath);
 
       let contextOptions = utils.splitKeypath(keypath);
       let ctx = new ValidationContext(contextOptions);
 
-      this.validation.addField({
-        validationContext: ctx,
-        initialValue: getter(),
-      });
+      if (this.validation) {
+        this.validation.addField({
+          validationContext: ctx,
+          initialValue: getter(),
+        });
+      }
 
       let options = {};
 
@@ -79,6 +110,7 @@ let mixin = {
       }
 
       let validateMethod = createValidateMethod(validator, keypath, ctx, getter).bind(this);
+      validateMethod.origFn = validator;
 
       // add to validate method list
       this.$options.validateMethods[keypath] = validateMethod;
@@ -206,7 +238,7 @@ function watchProperty(vm, keypath, callback) {
 
 function createValidateMethod(validator, keypath, ctx, getter) {
 
-  return function () {
+  let wrapper = function () {
     if (avvConfig.getMode() === modes.CONSERVATIVE && !this.validation.activated) { // do nothing if in conservative mode and $validate() method is not called before
       return Promise.resolve(false);
     }
@@ -235,6 +267,7 @@ function createValidateMethod(validator, keypath, ctx, getter) {
       return Promise.resolve(false);
     }
   };
+  return wrapper;
 }
 
 export default mixin;

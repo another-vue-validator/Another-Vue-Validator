@@ -14,7 +14,7 @@ export default {
   size: '{0} size must be {1}.',
   length: '{0} length must be {1}.',
   minLength: '{0} must have at least {1} characters.',
-  maxLength: '{0} must have up to {1} characters.',
+  maxLength: '{0} can have up to {1} characters.',
   lengthBetween: '{0} length must between {1} and {2}.',
   in: '{0} must be either {1}.',
   notIn: '{0} must not be {1}.',

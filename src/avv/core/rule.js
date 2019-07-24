@@ -132,35 +132,40 @@ Rule.prototype.rangeCheck = function (message, template, origArgs, check) {
 Rule.prototype.lessThan = function (bound, message) {
 
   return this.rangeCheck(message, this.templates.lessThan, arguments, (number) => {
-    return (number >= bound);
+    let answer = number >= bound;
+    return answer;
   });
 };
 
 Rule.prototype.lessThanOrEqualTo = function (bound, message) {
 
   return this.rangeCheck(message, this.templates.lessThanOrEqualTo, arguments, (number) => {
-    return (number > bound);
+    let answer = number > bound;
+    return answer;
   });
 };
 
 Rule.prototype.greaterThan = function (bound, message) {
 
   return this.rangeCheck(message, this.templates.greaterThan, arguments, (number) => {
-    return (number <= bound);
+    let answer =  number <= bound;
+    return answer;
   });
 };
 
 Rule.prototype.greaterThanOrEqualTo = function (bound, message) {
 
   return this.rangeCheck(message, this.templates.greaterThanOrEqualTo, arguments, (number) => {
-    return (number < bound);
+    let answer =  number < bound;
+    return answer;
   });
 };
 
 Rule.prototype.between = function (lowBound, highBound, message) {
 
   return this.rangeCheck(message, this.templates.between, arguments, (number) => {
-    return (number < lowBound || number > highBound);
+    let answer = number < lowBound || number > highBound;
+    return answer;
   });
 };
 

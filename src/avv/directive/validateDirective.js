@@ -2,12 +2,17 @@
 
 import EventManager from './EventManager';
 import dependencyService from './dependencyService';
+import {Validator} from '../index';
 
 let eventManager = new EventManager();
 
 export default {
 
+  // NOTE: Don't use bind(), it fires *before* the DOM is inserted, thus one cannot use  the v-validate: {el: '#myElem"} property to
+  // specify the selector for the element, because the elemtn isn't in the DOM yet
   inserted(el, binding, vnode) {
+    //let obj = binding.value.rules[0];
+    //console.log("inside bind " , obj.active)
 
     let vm = vnode.context;
 
@@ -33,6 +38,25 @@ export default {
       throw new Error('you must specify the path to your model -> v-validate("person.name")');
     }
 
+    let proxy = vm.$getValidatorMethod(expr);
+    if (proxy == null) {
+
+      let ruleDefinitions = getRuleDefinitions(binding);
+      if (ruleDefinitions != null) {
+
+        proxy = function () {
+          return proxy.validationExecutor.apply(this, arguments);
+        };
+
+        let validationExecutor = buildValidationExecutor(ruleDefinitions);
+        proxy.validationExecutor = validationExecutor;
+
+        vm.$addValidator(expr, proxy);
+      }
+    } else {
+      console.warn('There is already a programmatic validator set for "' + expr + '". Ignoring the declarative validator.');
+    }
+
     setupDependencies(expr, vm);
 
     if (showOnError(binding)) {
@@ -44,8 +68,24 @@ export default {
     eventManager.addEventListeners(el, eventNames, getTouchListener(el, vm, expr));
   },
 
-  unbind(el, binding, vnode) {
+  update(el, binding, vnode) {
+    console.log("directive update", binding.value);
 
+    let vm = vnode.context;
+
+    let expr = EventManager.findVModelExpr(vnode, binding);
+
+    let proxy = getProxy( vm, expr );
+    if (proxy != null) {
+      let ruleDefinitions = getRuleDefinitions(binding);
+      if (ruleDefinitions != null) {
+        let ruleExecutor = buildValidationExecutor(ruleDefinitions);
+        proxy.validationExecutor = ruleExecutor;
+      }
+    }
+  },
+
+  unbind(el, binding, vnode) {
     el = resolveEl(el, binding);
 
     let eventNames = EventManager.getTouchEventNames(el);
@@ -81,6 +121,120 @@ function showOnError(binding) {
   return false;
 }
 
+function getRuleDefinitions(binding) {
+
+  if (binding.value && binding.value && binding.value.rules) {
+    let definitions = [];
+
+    let ruleArray = binding.value.rules;
+    ruleArray = Array.isArray(ruleArray) ? ruleArray : [ruleArray];
+
+
+    ruleArray.forEach(rule => {
+      let definition = getRuleDefinition(rule);
+      definitions.push(definition);
+    });
+
+    return definitions;
+  }
+}
+
+function getRuleDefinition(value) {
+  if (typeof value === 'object') {
+    value = prepareRuleFromObject(value);
+    return value;
+  }
+
+  let result = parseRuleDefinition(value);
+  return result;
+}
+
+function prepareRuleFromObject(value) {
+  value.args = value.args || [];
+  if (value.msg) {
+    value.args.push(value.msg);
+  }
+  return value;
+}
+
+function parseRuleDefinition(value) {
+  let definition = splitNameAndArgs(value);
+  if (definition.args != null) {
+
+    // Parse individual args from the value, separated by comma
+    // treat single quotes (') as String messages, so commas inside quotes must not split into separate args.
+    let args = definition.args.match(/('.*?'|[^',]+)(?=\s*,|\s*$)/g);
+    let i = args.length - 1;
+    args[i] = stripQuotes(args[i]);
+
+    definition.args = args;
+  }
+  return definition;
+}
+
+function stripQuotes(msg) {
+  if (msg.length > 2) {
+    if (msg.charAt(0) === "'" && msg.charAt(msg.length - 1) === "'") {
+      msg = msg.slice(1, -1);
+    }
+    return msg;
+  }
+}
+
+function splitNameAndArgs(str) {
+  let result = {};
+  let delimiter = ':';
+  if (str.indexOf(':') > 0) {
+    result.name = str.substring(0, str.indexOf(delimiter));
+    result.args = str.substring(str.indexOf(delimiter) + 1);
+  } else {
+    result.name = str;
+  }
+
+  return result;
+}
+
+function buildValidationExecutor(ruleDefinitionsArray) {
+  let validators = [
+    (ctx) => {
+      return Validator.context(ctx);
+    }
+  ]
+
+  ruleDefinitionsArray.forEach(definition => {
+
+    let validator = function () {
+      if (definition.active === false) {
+        return this;
+      }
+
+      if (this[definition.name]) {
+
+        let result = this[definition.name].apply(this, definition.args);
+        return result;
+      } else {
+        console.error('no rule called "' + definition.name + '" defined');
+      }
+
+      return this;
+    };
+
+    validators.push(validator);
+  });
+
+  let result = null;
+
+  let validationExecutor = function () {
+
+    for (let i = 0; i < validators.length; i++) {
+      let validator = validators[i];
+      result = validator.apply(result, arguments);
+    }
+    return result;
+  }
+  return validationExecutor;
+}
+
 function getTouchListener(el, vm, keypath) {
 
   let touchListener = function (evt) {
@@ -107,9 +261,15 @@ function getTouchListener(el, vm, keypath) {
       eventManager.removeEventListeners(el, eventNames);
 
     }
-
-    console.log(evt.type);
   };
 
   return touchListener;
+}
+
+function getProxy(vm, expr) {
+  let method = vm.$getValidatorMethod(expr);
+  if (method == null || method.origFn == null) {
+    return null;
+  }
+  return method.origFn;
 }

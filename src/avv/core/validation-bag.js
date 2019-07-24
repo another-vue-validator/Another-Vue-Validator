@@ -24,10 +24,6 @@ function ValidationBag(options = {}) {
   this._vm = options.vm;
 }
 
-ValidationBag.prototype._setVM = function(vm) {
-  this._vm = vm;
-};
-
 ValidationBag.prototype.addField = function (options) {
 
   // if (this.resetting) {
@@ -36,8 +32,14 @@ ValidationBag.prototype.addField = function (options) {
 
   let field = new Field(options);
 
-  // Add reactive field using Vue.set
-  this._vm.$set(this.fields, options.validationContext.path, field);
+  if (this._vm) {
+    // Add reactive field using Vue.set
+    this._vm.$set(this.fields, options.validationContext.path, field);
+
+  } else {
+    // We still set the field but it won't be reactive
+    this.fields[options.keypath] = field;
+  }
 
   return field;
 };
@@ -146,6 +148,10 @@ ValidationBag.prototype.countErrors = function (keypath) {
 
     return sum;
   }
+};
+
+ValidationBag.prototype._setVM = function(vm) {
+  this._vm = vm;
 };
 
 ValidationBag.prototype.setValidating = function (keypath, id) {
@@ -422,12 +428,13 @@ ValidationBag.prototype.reset = function (keypath) {
   // this.passedRecords = [];
   // this.touchedRecords = [];
 
-  // prevent field updates at the same tick to change validation status
-  this.resetting++;
-  this._vm.$nextTick(function () {
-    this.resetting--;
-  }.bind(this));
-
+  if (this._vm) {
+    // prevent field updates at the same tick to change validation status
+    this.resetting++;
+    this._vm.$nextTick(function () {
+      this.resetting--;
+    }.bind(this));
+  }
   this.activated = false;
 };
 

@@ -38,7 +38,7 @@ ValidationBag.prototype.addField = function (options) {
 
   } else {
     // We still set the field but it won't be reactive
-    this.fields[options.keypath] = field;
+    this.fields[options.validationContext.path] = field;
   }
 
   return field;
@@ -235,8 +235,15 @@ ValidationBag.prototype.show = function (keypath, flags) {
   // TODO perhaps specify per/field flags to show or not to?
   // Then if we don't use v-validate we can use different set of flags to show and if we do use v-validate use another set of flags
   if (flags) {
+    if (!Array.isArray(flags)) {
+      throw new Error("The flags argument to show() must be an array eg. show(keypath, ['dirty', 'invalid'])");
+    }
 
-    let passed = flags.filter(flag => this._isFlag(keypath, flag));
+    let passed = flags.filter(flag => {
+      let result = this._isFlag(keypath, flag);
+      return result;
+    });
+
     return err && passed.length > 0;
   }
 

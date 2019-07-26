@@ -25,10 +25,6 @@ export default class Field {
     this.validating = false;
     this.validatingId = null;
     this.dependencies = [];
-
-    if (this.flags == null) {
-      this.flags = new Flags();
-    }
   }
 
 

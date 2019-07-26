@@ -223,7 +223,6 @@ ValidationBag.prototype._isFlag = function (keypath, flag) {
   }
 };
 
-
 ValidationBag.prototype.show = function (keypath, flags) {
   let err = this.hasError(keypath);
 

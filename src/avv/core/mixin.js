@@ -12,10 +12,10 @@ let mixin = {
 
   beforeMount: function () {
 
-    this.$init();
+    this.$avvInit();
 
     if (this.validation) {
-    // TODO we set VM here instead of in data(){} because Vue does sync' with component data and it causes infinite loops?
+      // TODO we set VM here instead of in data(){} because Vue does sync' with component data and it causes infinite loops?
       this.validation._setVM(this);
     }
     //this.$addValidators(this.$options.avv);
@@ -35,14 +35,14 @@ let mixin = {
     unwatch(this.$options.validatorsUnwatchCallbacks);
   },
 
-  data: function () {
+  data() {
     let avv = this.$options.avv;
     if (avv == null) {
       avv = this.$options.avv = {};
     }
+    avv.mode = avv.mode || avvConfig.getMode();
 
     avv.validators = avv.validators || {};
-
 
     let validation = new ValidationBag();
     //validation._setVM(this);
@@ -53,7 +53,7 @@ let mixin = {
   },
 
   methods: {
-    $init: function () {
+    $avvInit: function () {
       unwatch(this.$options.validatorsUnwatchCallbacks);
 
       // validate methods contains all application validate codes
@@ -63,7 +63,7 @@ let mixin = {
     },
 
     $setValidators: function (avv) {
-      this.$init();
+      this.$avvInit();
       this.$addValidators(avv);
     },
 
@@ -74,6 +74,10 @@ let mixin = {
           let validator = avv.validators[key];
           this.$addValidator(key, validator);
         }, this);
+
+        if (this.$options.avv.mode == modes.MANUAL && avv.deps) {
+          console.warn('Mode is set to \'' + modes.MANUAL + '\', yet deps have been set which fires validations when model changes');
+        }
 
         mixinUtils.setupDependencies(this);
       }
@@ -103,13 +107,15 @@ let mixin = {
         validator = validator.validator;
       }
 
+      options.mode = options.mode || this.$options.avv.mode;
+
       if (options.cache) {
         // cache the validation result, so that async validator can be fast when submitting the form
         let option = options.cache === 'last' ? 'last' : 'all';
         validator = mixinUtils.cache(validator, option);
       }
 
-      let validateMethod = createValidateMethod(validator, keypath, ctx, getter).bind(this);
+      let validateMethod = createValidateMethod(validator, keypath, ctx, getter, options).bind(this);
       validateMethod.origFn = validator;
 
       // add to validate method list
@@ -122,10 +128,9 @@ let mixin = {
         validateMethodForWatch = mixinUtils.debounce.bind(this)(keypath, options.debounce, validateMethod);
       }
 
-      if (avvConfig.getMode() !== modes.MANUAL) { // have to call $validate() to trigger validation in manual mode, so don't watch,
+      if (options.mode !== modes.MANUAL) { // have to call $validate() to trigger validation in manual mode, so don't watch,
         let unwatch = watchProperty(this, keypath, validateMethodForWatch); //.forEach(function (unwatch) {
         this.$options.validatorsUnwatchCallbacks.push(unwatch);
-        //}.bind(this));
       }
     },
 
@@ -236,10 +241,10 @@ function watchProperty(vm, keypath, callback) {
   //});
 }
 
-function createValidateMethod(validator, keypath, ctx, getter) {
+function createValidateMethod(validator, keypath, ctx, getter, options) {
 
   let wrapper = function () {
-    if (avvConfig.getMode() === modes.CONSERVATIVE && !this.validation.activated) { // do nothing if in conservative mode and $validate() method is not called before
+    if (options.mode === modes.CONSERVATIVE && !this.validation.activated) { // do nothing if in conservative mode and $validate() method is not called before
       return Promise.resolve(false);
     }
 

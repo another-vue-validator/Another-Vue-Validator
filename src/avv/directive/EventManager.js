@@ -28,7 +28,7 @@ export default class EventManager {
   }
 
   removeEventListeners(el, events) {
-    console.log('before remove', this.eventData.size);
+    //console.log('before remove', this.eventData.size);
 
     //let subList = this.eventData.filter(data => data.el === el);
     // Clone the array so we can remove items below without effecting the loop
@@ -100,7 +100,7 @@ export default class EventManager {
       this._removeListenerAndData(data);
     }
 
-    console.log('after remove', this.eventData.size);
+    //console.log('after remove', this.eventData.size);
   }
 
   _removeListenerAndData(data) {

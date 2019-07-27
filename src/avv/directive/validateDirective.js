@@ -9,10 +9,8 @@ let eventManager = new EventManager();
 export default {
 
   // NOTE: Don't use bind(), it fires *before* the DOM is inserted, thus one cannot use  the v-validate: {el: '#myElem"} property to
-  // specify the selector for the element, because the elemtn isn't in the DOM yet
+  // specify the selector for the element, because the element isn't in the DOM yet
   inserted(el, binding, vnode) {
-    //let obj = binding.value.rules[0];
-    //console.log("inside bind " , obj.active)
 
     let vm = vnode.context;
 
@@ -44,14 +42,16 @@ export default {
       let ruleDefinitions = getRuleDefinitions(binding);
       if (ruleDefinitions != null) {
 
-        proxy = function () {
-          return proxy.validationExecutor.apply(this, arguments);
-        };
+        // proxy = function () {
+        //   return proxy.validationExecutor.apply(this, arguments);
+        // };
 
         let validationExecutor = buildValidationExecutor(ruleDefinitions);
-        proxy.validationExecutor = validationExecutor;
+        //proxy.validationExecutor = validationExecutor;
 
-        vm.$addValidator(expr, proxy);
+        //vm.$addValidator(expr, proxy);
+        vm.$addValidator(expr, validationExecutor);
+        //return;
       }
     } else {
       console.warn('There is already a programmatic validator set for "' + expr + '". Ignoring the declarative validator.');
@@ -69,20 +69,29 @@ export default {
   },
 
   update(el, binding, vnode) {
-    console.log("directive update", binding.value);
+    //console.log("directive update newValue", binding.value);
+    // console.log("directive update oldValue", binding.oldValue);
+    // console.log("directive update same?", binding.oldValue == binding.value);
 
-    let vm = vnode.context;
+    // We don't currently support dynamic declarative validations eg. you cannot conditionally set a required validation
+    // based on some property that can change at runtime.
 
-    let expr = EventManager.findVModelExpr(vnode, binding);
+    // However the code below shows how to re-declare the validation if the v-validate args change. Note that the
+    // update function is invoked every time the validation runs eg on each keypress so could be expensive operation.
 
-    let proxy = getProxy( vm, expr );
-    if (proxy != null) {
-      let ruleDefinitions = getRuleDefinitions(binding);
-      if (ruleDefinitions != null) {
-        let ruleExecutor = buildValidationExecutor(ruleDefinitions);
-        proxy.validationExecutor = ruleExecutor;
-      }
-    }
+
+    // let vm = vnode.context;
+    //
+    // let expr = EventManager.findVModelExpr(vnode, binding);
+    //
+    // let proxy = getProxy( vm, expr );
+    // if (proxy != null) {
+    //   let ruleDefinitions = getRuleDefinitions(binding);
+    //   if (ruleDefinitions != null) {
+    //     let ruleExecutor = buildValidationExecutor(ruleDefinitions);
+    //     proxy.validationExecutor = ruleExecutor;
+    //   }
+    // }
   },
 
   unbind(el, binding, vnode) {

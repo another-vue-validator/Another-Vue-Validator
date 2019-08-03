@@ -47,11 +47,20 @@ Rule.prototype.prop = function (prop) {
 };
 
 Rule.prototype.context = function (ctx) {
+  if (ctx == null) {
+    return this._ctx;
+  }
 
   let newProp = this._ctx.prop.length == 0 ? ctx.prop : this._ctx.prop;
 
   this._ctx = Object.assign(this._ctx, ctx);
   this._ctx.prop = newProp;
+  return this;
+};
+
+Rule.prototype.value = function (value) {
+  this._ctx = this._ctx || new ValidationContext();
+  this._ctx.value = value;
   return this;
 };
 
@@ -148,7 +157,7 @@ Rule.prototype.lessThanOrEqualTo = function (bound, message) {
 Rule.prototype.greaterThan = function (bound, message) {
 
   return this.rangeCheck(message, this.templates.greaterThan, arguments, (number) => {
-    let answer =  number <= bound;
+    let answer = number <= bound;
     return answer;
   });
 };
@@ -156,7 +165,7 @@ Rule.prototype.greaterThan = function (bound, message) {
 Rule.prototype.greaterThanOrEqualTo = function (bound, message) {
 
   return this.rangeCheck(message, this.templates.greaterThanOrEqualTo, arguments, (number) => {
-    let answer =  number < bound;
+    let answer = number < bound;
     return answer;
   });
 };
@@ -298,6 +307,10 @@ Rule.prototype.hasImmediateError = function () {
     }
   }
   return false;
+};
+
+Rule.prototype.hasError = function () {
+  return this.hasImmediateError();
 };
 
 Rule.prototype.addMessage = function (message, template, ctx) {

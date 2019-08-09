@@ -14,7 +14,7 @@ export default class Field {
 
     if (options.validationContext == null) {
       let contextOptions = utils.splitKeypath(options.keypath);
-      options.validationContext = new ValidationContext( contextOptions );
+      options.validationContext = new ValidationContext(contextOptions);
     }
 
     this.errorList = options.errors || [];
@@ -121,9 +121,12 @@ export default class Field {
     return this.validatingId;
   }
 
-  resetValidating() {
-    this.setValidatingId(null);
-    this.setValidating(false);
+  resetValidating(id) {
+
+    if (id == null || id === this.getValidatingId() ) {
+      this.setValidatingId(null);
+      this.setValidating(false);
+    }
   }
 
   getDependencies() {

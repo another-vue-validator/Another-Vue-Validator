@@ -18,54 +18,10 @@ export default {
       throw new Error('Validator hasn\'t been setup for this view.');
     }
 
-    el = resolveEl(el, binding);
+    vm.$once("hook:mounted", () => {
+      mounted( vm, el, binding, vnode );
+    });
 
-
-    let eventNames = EventManager.getTouchEventNames(el);
-
-    // setTimeout(function() {
-    //   console.log('BEFORE', eventManager.eventData.size)
-    //   eventManager.removeEventListeners(el, eventNames);
-    //   console.log('AFTER', eventManager.eventData.size)
-    // }, 5000)
-
-    let expr = EventManager.findVModelExpr(vnode, binding);
-
-    //console.log('v-model expression', expr ? expr : 'could not find v-model expression on element ' + el.tagName);
-    if (expr == null) {
-      throw new Error('you must specify the path to your model -> v-validate("person.name")');
-    }
-
-    let proxy = vm.$getValidatorMethod(expr);
-    if (proxy == null) {
-
-      let ruleDefinitions = getRuleDefinitions(binding);
-      if (ruleDefinitions != null) {
-
-        // proxy = function () {
-        //   return proxy.validationExecutor.apply(this, arguments);
-        // };
-
-        let validationExecutor = buildValidationExecutor(ruleDefinitions);
-        //proxy.validationExecutor = validationExecutor;
-
-        //vm.$addValidator(expr, proxy);
-        vm.$addValidator(expr, validationExecutor);
-        //return;
-      }
-    } else {
-      console.warn('There is already a programmatic validator set for "' + expr + '". Ignoring the declarative validator.');
-    }
-
-    setupDependencies(expr, vm);
-
-    if (showOnError(binding)) {
-      vm.validation.setTouched(expr, true);
-      // TODO What else should we flag to ensure error is always shown?
-      return;
-    }
-
-    eventManager.addEventListeners(el, eventNames, getTouchListener(el, vm, expr));
   },
 
   update(el, binding, vnode) {
@@ -102,6 +58,40 @@ export default {
   }
 };
 
+function mounted( vm, el, binding, vnode) {
+
+  el = resolveEl(el, binding);
+
+  let eventNames = EventManager.getTouchEventNames(el);
+
+  // setTimeout(function() {
+  //   console.log('BEFORE', eventManager.eventData.size)
+  //   eventManager.removeEventListeners(el, eventNames);
+  //   console.log('AFTER', eventManager.eventData.size)
+  // }, 5000)
+
+  let expr = EventManager.findVModelExpr(vnode, binding);
+
+  //console.log('v-model expression', expr ? expr : 'could not find v-model expression on element ' + el.tagName);
+  if (expr == null) {
+    throw new Error('you must specify the path to your model -> v-validate("person.name")');
+  }
+
+  if (hasDeclarativeRules(binding)) {
+    setupDeclarativeRules( vm, expr, binding );
+  }
+
+  setupDependencies(expr, vm);
+
+  if (showOnError(binding)) {
+    vm.validation.setTouched(expr, true);
+    // TODO What else should we flag to ensure error is always shown?
+    return;
+  }
+
+  eventManager.addEventListeners(el, eventNames, getTouchListener(el, vm, expr));
+}
+
 function setupDependencies(keypath, vm) {
   let field = vm.validation.getField(keypath);
   if (field) {
@@ -130,9 +120,36 @@ function showOnError(binding) {
   return false;
 }
 
+function setupDeclarativeRules(vm, expr, binding ) {
+
+  let proxy = vm.$getValidatorMethod(expr);
+  if (proxy == null) {
+
+    let ruleDefinitions = getRuleDefinitions(binding);
+    if (ruleDefinitions != null) {
+
+      // proxy = function () {
+      //   return proxy.validationExecutor.apply(this, arguments);
+      // };
+
+      let validationExecutor = buildValidationExecutor(ruleDefinitions);
+      //proxy.validationExecutor = validationExecutor;
+
+      //vm.$addValidator(expr, proxy);
+      vm.$addValidator(expr, validationExecutor);
+    }
+  } else {
+    console.warn('There is already a programmatic validator set for "' + expr + '". Ignoring the declarative validator.');
+  }
+}
+
+function hasDeclarativeRules(binding) {
+  return binding.value && binding.value.rules;
+}
+
 function getRuleDefinitions(binding) {
 
-  if (binding.value && binding.value && binding.value.rules) {
+  if (hasDeclarativeRules(binding)) {
     let definitions = [];
 
     let ruleArray = binding.value.rules;

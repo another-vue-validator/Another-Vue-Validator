@@ -11,8 +11,8 @@ import {
   formatMessage,
   isFunction,
   optionCombiner
-}
-  from '../utils/utils';
+} from '../utils/utils';
+
 import ValidationContext from './ValidationContext';
 
 function Rule(templates) {
@@ -46,8 +46,14 @@ Rule.prototype.prop = function (prop) {
   return this;
 };
 
+Rule.prototype.fieldName = function (name) {
+  this.prop(name);
+  return this;
+};
+
 Rule.prototype.context = function (ctx) {
   if (ctx == null) {
+    // getter
     return this._ctx;
   }
 

@@ -2,6 +2,7 @@
 
 import * as utils from '../utils/utils';
 import Field from './Field';
+import Vue from 'vue';
 
 function ValidationBag(options = {}) {
 
@@ -32,14 +33,19 @@ ValidationBag.prototype.addField = function (options) {
 
   let field = new Field(options);
 
-  if (this._vm) {
-    // Add reactive field using Vue.set
-    this._vm.$set(this.fields, options.validationContext.path, field);
+  Vue.set(this.fields, options.validationContext.path, field);
 
-  } else {
-    // We still set the field but it won't be reactive
-    this.fields[options.validationContext.path] = field;
-  }
+  // field = Vue.observable(field);
+   //this.fields[options.validationContext.path] = field;
+
+  // if (this._vm) {
+  //   // Add reactive field using Vue.set
+  //   this._vm.$set(this.fields, options.validationContext.path, field);
+  //
+  // } else {
+  //   // We still set the field but it won't be reactive
+  //   this.fields[options.validationContext.path] = field;
+  // }
 
   return field;
 };
@@ -150,7 +156,7 @@ ValidationBag.prototype.countErrors = function (keypath) {
   }
 };
 
-ValidationBag.prototype._setVM = function(vm) {
+ValidationBag.prototype._setVM = function (vm) {
   this._vm = vm;
 };
 
@@ -173,17 +179,16 @@ ValidationBag.prototype.setValidating = function (keypath, id) {
   }
 };
 
-ValidationBag.prototype.resetValidating = function (keypath) {
+ValidationBag.prototype.resetValidating = function (keypath, id ) {
 
   if (keypath) {
     let field = this.getField(keypath);
     if (field) {
-      field.resetValidating();
+      field.resetValidating( id );
     }
 
   } else {
-    // TODO will this ever execute since keypath always exist?
-    Object.values(this.fields).forEach(field => field.resetValidating());
+    Object.values(this.fields).forEach(field => field.resetValidating( id ));
   }
 };
 
@@ -268,6 +273,13 @@ ValidationBag.prototype.show = function (keypath, flags) {
 ValidationBag.prototype.forceShow = function (keypath) {
   this.setTouched(keypath, true);
   this.setDirty(keypath, true);
+};
+
+// This state is useful for async validations where you know the validation has completed and the state is valid or not
+ValidationBag.prototype.isPassed = function (keypath) {
+  let valid = this.isValidated(keypath) && this.isValid(keypath);
+  let validating = this.isValidating(keypath);
+  return valid && !validating;
 };
 
 ValidationBag.prototype.isValid = function (keypath) {
@@ -434,13 +446,13 @@ ValidationBag.prototype.reset = function (keypath) {
   // this.passedRecords = [];
   // this.touchedRecords = [];
 
-  if (this._vm) {
+  //if (this._vm) {
     // prevent field updates at the same tick to change validation status
     this.resetting++;
-    this._vm.$nextTick(function () {
+    Vue.$nextTick(function () {
       this.resetting--;
     }.bind(this));
-  }
+  //}
   this.activated = false;
 };
 
@@ -453,16 +465,16 @@ ValidationBag.prototype.setError = function (keypath, message) {
   this.removeErrors(keypath);
 
   let _addMessages = addMessages.bind(this);
-  let _setAsyncMessages = setAsyncMessages.bind(this);
+  let _addAsyncMessages = addAsyncMessages.bind(this);
 
   let messages = utils.isArray(message) ? message : [message];
 
-  var hasPromise = messages.filter(function (message) {
+  let hasPromise = messages.filter(function (message) {
     return message && message.then;
   }).length > 0;
 
   if (hasPromise) {
-    return _setAsyncMessages(keypath, messages);
+    return _addAsyncMessages(keypath, messages);
 
   } else {
     let hasError = _addMessages(keypath, messages);
@@ -479,31 +491,34 @@ ValidationBag.prototype.checkRule = function (rule) {
   return promise;
 };
 
-function setAsyncMessages(keypath, messages) {
+function addAsyncMessages(keypath, messages) {
   /* jshint validthis:true */
 
-  // if message is promise, we are encountering async validation, set validating flag and wait for message to resolve
+  // One of the messages is a promise, so we are encountering an async validation. Set validating flag and wait for messages to resolve
   // reset previous validating status for this keypath
   this.resetValidating(keypath);
-  var validatingId = this.setValidating(keypath);
-  var always = function () {
-    //console.log(validatingId + ' | ' + 'end');
-    this.resetValidating(keypath);
+  let validatingId = this.setValidating(keypath);
+
+  let always = function () {
+    this.resetValidating(keypath, validatingId);
   }.bind(this);
-  //console.log(validatingId + ' | ' + 'start');
 
   return Promise.all(messages)
     .then((messages) => {
 
       // check if the validating id is is still valid
       if (this.isValidating(keypath, validatingId)) {
-        //console.log(validatingId + ' | ' + 'processed');
 
         let _addMessages = addMessages.bind(this);
         return _addMessages(keypath, messages);
       }
-      return false;
-    }).bind(this)
+
+      // let field = this.getField(keypath);
+      // TODO if we get here it means we're not validating, so we return true or false? FALSE means no error, TRUE means error
+      let hasError = { aborted: true };
+      return hasError;
+      //}).bind(this)
+    })
 
     .then(function (result) {
       always();
@@ -516,6 +531,9 @@ function setAsyncMessages(keypath, messages) {
 }
 
 function addMessages(keypath, messages) {
+
+  this.setValidated(keypath, true);
+
   /*jshint validthis:true */
   let hasError = false;
   messages.forEach(function (message) {
@@ -532,7 +550,7 @@ function addMessages(keypath, messages) {
   return hasError;
 }
 
-var validatingId = 0;
+let validatingId = 0;
 
 ValidationBag.newValidatingId = function () {
   return (++validatingId).toString();

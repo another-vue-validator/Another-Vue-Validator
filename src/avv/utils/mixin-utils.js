@@ -85,7 +85,7 @@ export default {
     let validateMethodForWatch = function () {
       // eagerly resetting passed flag if debouncing is used.
       //this.validation.resetPassed(keypath);
-      this.validation.setValid(keypath, false);
+      //this.validation.setValid(keypath, true); // TODO should this be true or false?
       // store sessionId
       decoratedValidateMethod.sessionId = this.validation.sessionId;
       debouncedValidateMethod.apply(this, arguments);
@@ -95,7 +95,9 @@ export default {
   },
 
   cache(validator, option) {
-    return function () {
+
+    let cacheFn = (...args) => {
+
       let cache = validator.cache;
 
       if (!cache) {
@@ -103,8 +105,12 @@ export default {
         validator.cache = cache;
       }
 
-      let args = Array.prototype.slice.call(arguments);
-      let cachedResult = this.findInCache(cache, args);
+      let argsCopy = args.concat( [] );
+      let ctx = argsCopy.shift(); // ctx is at argsCopy[0], remove it
+      let cacheKey = [ctx.value]; // get its value as first item in key
+      cacheKey = cacheKey.concat(argsCopy); // append rest of the arguments to the cache key
+
+      let cachedResult = this.findInCache(cache, cacheKey);
 
       if (!utils.isUndefined(cachedResult)) {
         return cachedResult;
@@ -121,7 +127,7 @@ export default {
               if (option !== 'all') {
                 cache.splice(0, cache.length);
               }
-              cache.push({args: args, result: promiseResult});
+              cache.push({key: cacheKey, result: promiseResult});
             }
           });
 
@@ -130,16 +136,20 @@ export default {
           if (option !== 'all') {
             cache.splice(0, cache.length);
           }
-          cache.push({args: args, result: result});
+
+          cache.push({key: cacheKey, result: result});
           return result;
         }
       }
     };
+
+    return cacheFn;
   },
 
   findInCache(cache, args) {
     let items = cache.filter(function (item) {
-      return utils.isEqual(args, item.eventData);
+      let equal = utils.isEqual(args, item.key);
+      return equal;
     });
 
     if (!utils.isEmpty(items)) {

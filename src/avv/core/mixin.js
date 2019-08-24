@@ -148,9 +148,9 @@ let mixin = {
     $validate: function (keypaths) {
 
       // We're still busy with a previous validation eg async validation that it haven't resolved yet
-      if (this.validation._validatePromise) {
-        return this.validation._validatePromise;
-      }
+      // if (this.validation._validatePromise) {
+      //   return this.validation._validatePromise;
+      // }
 
       let validateMethods = this.$options.validateMethods;
 
@@ -173,7 +173,8 @@ let mixin = {
       }
 
       if (utils.isEmpty(validateMethods)) {
-        return Promise.resolve(true);
+        let valid = true;
+        return Promise.resolve(valid);
 
       } else {
         let always = function () {
@@ -188,9 +189,27 @@ let mixin = {
         this.validation._validatePromise = Promise.all(validatingMethods).then(function (results) {
           always();
 
-          let filtered = results.filter(result => !!result);
-          let result = filtered.length <= 0;
-          return result;
+          let aborted = false;
+          let filtered = results.filter(result => {
+
+            if ( result.aborted) {
+              aborted = true;
+              return;
+
+            } else {
+              return !!result;
+            }
+          });
+
+          // TODO if one of the validations in our chain is async and it is overridden and surpassed by a second async request, we
+          // return to caller neither valid or invalid, but rather undefined. That way the client knows that an async validation
+          // was cancelled by a second async validation and should wait until the second async validation result is returned.
+          if (aborted) {
+            return undefined;
+          }
+
+          let valid = filtered.length <= 0;
+          return valid;
 
         }.bind(this))
 
@@ -241,18 +260,20 @@ function watchProperty(vm, keypath, callback) {
   //});
 }
 
-function createValidateMethod(validator, keypath, ctx, getter, options) {
+function createValidateMethod(validator, keypath, ctxTemplate, getter, options) {
 
   let wrapper = function () {
     if (options.mode === modes.CONSERVATIVE && !this.validation.activated) { // do nothing if in conservative mode and $validate() method is not called before
       return Promise.resolve(false);
     }
 
-    // let args = getters.map(function (getter) {
-    //   return getter();
-    // });
+    let ctx = Object.assign({}, ctxTemplate);
 
-    ctx.value = getter();
+    Object.defineProperty(ctx, "value", {
+      value: getter(),
+      configurable: false,
+        writable: false
+    });
 
     let rule = validator.apply(this, [ctx]);
     if (rule) {

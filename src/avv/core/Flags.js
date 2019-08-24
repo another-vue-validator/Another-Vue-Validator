@@ -21,7 +21,6 @@ export default class Flags {
   setValid(val) {
     this.valid = val;
     this.invalid = !val;
-    this.setValidated(true);
   }
 
   setDirty(val) {

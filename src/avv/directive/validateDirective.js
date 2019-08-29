@@ -203,8 +203,8 @@ function stripQuotes(msg) {
     if (msg.charAt(0) === "'" && msg.charAt(msg.length - 1) === "'") {
       msg = msg.slice(1, -1);
     }
-    return msg;
   }
+  return msg;
 }
 
 function splitNameAndArgs(str) {

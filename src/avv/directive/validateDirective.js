@@ -200,7 +200,9 @@ function parseRuleDefinition(value) {
 
 function stripQuotes(msg) {
   if (msg.length > 2) {
-    if (msg.charAt(0) === "'" && msg.charAt(msg.length - 1) === "'") {
+    let c1 = msg.charAt(0);
+    let c2 = msg.charAt(msg.length - 1);
+    if ( (c1 === "'" && c2 === "'") || (c1 === '"' && c2 === '"') || (c1 === '`' && c2 === '`')) {
       msg = msg.slice(1, -1);
     }
   }
@@ -229,14 +231,18 @@ function buildValidationExecutor(ruleDefinitionsArray) {
 
   ruleDefinitionsArray.forEach(definition => {
 
-    let validator = function () {
-      if (definition.active === false) {
-        return this;
-      }
+    let validator = function (args) {
+
+      // if (definition.active === false) {
+      //   return this;
+      // }
 
       if (this[definition.name]) {
-
-        let result = this[definition.name].apply(this, definition.args);
+        let rule = this[definition.name];
+        if (definition.fieldName) {
+          this.fieldName(definition.fieldName);
+        }
+        let result = rule.apply(this, definition.args);
         return result;
       } else {
         console.error('no rule called "' + definition.name + '" defined');

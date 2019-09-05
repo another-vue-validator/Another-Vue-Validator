@@ -19,7 +19,7 @@ export default {
     }
 
     vm.$once("hook:mounted", () => {
-      mounted( vm, el, binding, vnode );
+      mounted(vm, el, binding, vnode);
     });
 
   },
@@ -58,7 +58,7 @@ export default {
   }
 };
 
-function mounted( vm, el, binding, vnode) {
+function mounted(vm, el, binding, vnode) {
 
   el = resolveEl(el, binding);
 
@@ -78,7 +78,7 @@ function mounted( vm, el, binding, vnode) {
   }
 
   if (hasDeclarativeRules(binding)) {
-    setupDeclarativeRules( vm, expr, binding );
+    setupDeclarativeRules(vm, expr, binding);
   }
 
   setupDependencies(expr, vm);
@@ -120,7 +120,7 @@ function showOnError(binding) {
   return false;
 }
 
-function setupDeclarativeRules(vm, expr, binding ) {
+function setupDeclarativeRules(vm, expr, binding) {
 
   let proxy = vm.$getValidatorMethod(expr);
   if (proxy == null) {
@@ -202,7 +202,7 @@ function stripQuotes(msg) {
   if (msg.length > 2) {
     let c1 = msg.charAt(0);
     let c2 = msg.charAt(msg.length - 1);
-    if ( (c1 === "'" && c2 === "'") || (c1 === '"' && c2 === '"') || (c1 === '`' && c2 === '`')) {
+    if ((c1 === "'" && c2 === "'") || (c1 === '"' && c2 === '"') || (c1 === '`' && c2 === '`')) {
       msg = msg.slice(1, -1);
     }
   }
@@ -287,7 +287,7 @@ function getTouchListener(el, vm, keypath) {
           vm.validation.forceShow(dep);
         });
       } else {
-        console.warn('no validation field found for v-model/expr: "' + keypath + '". Use v-validate="{expr: \'some.keypath\'}" to specify a valid keypath');
+        console.warn('no validation or field found for v-model/expr: "' + keypath + '". Use v-validate="{expr: \'some.keypath\'}" to specify a valid keypath');
       }
 
       eventManager.removeEventListeners(el, eventNames);

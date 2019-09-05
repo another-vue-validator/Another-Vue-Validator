@@ -53,14 +53,15 @@ export default {
       //let others = utils.omit(depsObj, keypathToWatch);
 
       let depMethod = () => {
-        return vm.$validate(others);
+        return vm.$validate(others, {isDependency: true});
       };
 
       let depToWatch = depMethod;
 
-      if (dep.debounce) {
-        depToWatch = this.debounce.bind(vm)(keypathToWatch, dep.debounce, depMethod);
-      }
+      // TODO should we consider the debounce property for dependent validations?
+      // if (dep.debounce) {
+      //   depToWatch = this.debounce.bind(vm)(keypathToWatch, dep.debounce, depMethod);
+      // }
       let unwatch = vm.$watch(keypathToWatch, depToWatch);
 
       //TODO Ensure unwatch works
@@ -105,7 +106,7 @@ export default {
         validator.cache = cache;
       }
 
-      let argsCopy = args.concat( [] );
+      let argsCopy = args.concat([]);
       let ctx = argsCopy.shift(); // ctx is at argsCopy[0], remove it
       let cacheKey = [ctx.value]; // get its value as first item in key
       cacheKey = cacheKey.concat(argsCopy); // append rest of the arguments to the cache key

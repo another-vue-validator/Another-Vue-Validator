@@ -145,7 +145,7 @@ let mixin = {
       }
     },
 
-    $validate: function (keypaths) {
+    $validate: function (keypaths, options) {
 
       // We're still busy with a previous validation eg async validation that it haven't resolved yet
       // if (this.validation._validatePromise) {
@@ -182,7 +182,7 @@ let mixin = {
         }.bind(this);
 
         let validatingMethods = validateMethods.map(function (validateMethod) {
-          let result = validateMethod();
+          let result = validateMethod( options );
           return result;
         });
 
@@ -262,12 +262,13 @@ function watchProperty(vm, keypath, callback) {
 
 function createValidateMethod(validator, keypath, ctxTemplate, getter, options) {
 
-  let wrapper = function () {
+  let wrapper = function ( validationOptions = {}) {
     if (options.mode === modes.CONSERVATIVE && !this.validation.activated) { // do nothing if in conservative mode and $validate() method is not called before
       return Promise.resolve(false);
     }
 
-    let ctx = Object.assign({}, ctxTemplate);
+    // validation options (those passed through $validate() ) are copied onto the ctx object and passed to the individual validation methods
+    let ctx = Object.assign({}, ctxTemplate, validationOptions );
 
     Object.defineProperty(ctx, "value", {
       value: getter(),

@@ -56,7 +56,7 @@ export {
   ValidationBag,
   Rule,
   Validator,
-  //mixin,
+  mixin,
   setMode,
   extendTemplates,
   utils

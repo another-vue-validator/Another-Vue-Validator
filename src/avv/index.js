@@ -26,9 +26,6 @@ let plugin = {
       if (options.mode) {
         avvConfig.setMode(options.mode);
       }
-      if (options.Promise) {
-        mixin.Promise = options.Promise;
-      }
     }
   },
 

@@ -8,8 +8,6 @@ import modes from './config/modes';
 
 let mixin = {
 
-  Promise: null,
-
   beforeMount: function () {
 
     this.$avvInit();

@@ -16,11 +16,11 @@ let mixin = {
       // TODO we set VM here instead of in data(){} because Vue does sync' with component data and it causes infinite loops?
       this.validation._setVM(this);
     }
-    //this.$addValidators(this.$options.avv);
+    //this.$addValidators(this.$options.validation);
   },
 
   mounted: function () {
-    this.$addValidators(this.$options.avv);
+    this.$addValidators(this.$options.validation);
     // TODO add validators here or beforeMount? If added in beforeMount, data set component inside beforeMount will be
     // validated when set, and thus in an invalid state immediately. Setting validators in mounted, means data set
     // during beforeMount won't be validated since the validators haven't been set yet. However data in components
@@ -34,9 +34,9 @@ let mixin = {
   },
 
   data() {
-    let avv = this.$options.avv;
+    let avv = this.$options.validation;
     if (avv == null) {
-      avv = this.$options.avv = {};
+      avv = this.$options.validation = {};
     }
     avv.mode = avv.mode || avvConfig.getMode();
 
@@ -73,7 +73,7 @@ let mixin = {
           this.$addValidator(key, validator);
         }, this);
 
-        if (this.$options.avv.mode == modes.MANUAL && avv.deps) {
+        if (this.$options.validation.mode == modes.MANUAL && avv.deps) {
           console.warn('Mode is set to \'' + modes.MANUAL + '\', yet deps have been set which fires validations when model changes');
         }
 
@@ -105,7 +105,7 @@ let mixin = {
         validator = validator.validator;
       }
 
-      options.mode = options.mode || this.$options.avv.mode;
+      options.mode = options.mode || this.$options.validation.mode;
 
       if (options.cache) {
         // cache the validation result, so that async validator can be fast when submitting the form
@@ -137,9 +137,9 @@ let mixin = {
     },
 
     $getValidator(key) {
-      let avv = this.$options.avv;
-      if (avv && avv.validators) {
-        return avv.validators[key];
+      let validation = this.$options.validation;
+      if (validation && validation.validators) {
+        return validation.validators[key];
       }
     },
 

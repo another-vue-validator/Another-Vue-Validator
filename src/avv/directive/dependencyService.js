@@ -14,7 +14,7 @@ export default {
 
     depsByKeypath = {};
     let deps;
-    let avv = vm.$options.avv;
+    let avv = vm.$options.validation;
     if (avv && avv.deps) {
       deps = avv.deps;
     }

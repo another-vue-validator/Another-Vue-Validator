@@ -23,7 +23,7 @@ export default {
    */
   setupDependencies(vm) {
 
-    let avv = vm.$options.avv;
+    let avv = vm.$options.validation;
     let deps = avv.deps;
 
     if (deps) {
